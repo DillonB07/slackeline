@@ -1,7 +1,7 @@
 import os
+import time
 from slack_bolt import App
 from dotenv import load_dotenv
-
 from dialogue import WELCOME
 
 load_dotenv()
@@ -31,6 +31,7 @@ def handle_member_joined_channel(body, say):
         msg = say(new_msg, icon_emoji=msg["icon_emoji"], username=msg["username"], thread_ts=initial_msg)
         if initial_msg is None:
             initial_msg = msg["ts"]
+        time.sleep(msg.get("delay", 1.8))
 
 
 if __name__ == "__main__":
