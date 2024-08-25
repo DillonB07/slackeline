@@ -15,7 +15,7 @@ WELCOME = [
             "username": "Madeline",
             "messages": [
                 "Excuse me, ma'am\nThe sign out front is busted... is this the trail to the _:sparkles:waffle house:sparkles:_?",
-                "Ma'am, the sign out front is busted... am I near the _:sparkles:waffle house:sparkles:_?"
+                "Ma'am, the sign out front is busted... am I near the _:sparkles:waffle house:sparkles:_?",
             ],
         },
         {
@@ -24,7 +24,7 @@ WELCOME = [
             "messages": [
                 "_You're almost there, (pronouns). It's just across the bridge._",
                 "_You're nearly there, (pronouns). It's just over the bridge._",
-                "_The _:sparkles:waffle house:sparkles:_ is just over the bridge (pronouns)_"
+                "_The _:sparkles:waffle house:sparkles:_ is just over the bridge (pronouns)_",
             ],
             "replacements": [
                 {"replace": "she", "with": "miss"},
@@ -91,6 +91,29 @@ WELCOME = [
             "messages": ["You should seek help, lady."],
             "delay": 0.4,
         },
-        {"icon_emoji": ":grannylaughing:", "username": "Old Lady", "messages": ["\n"]},
+        {
+            "icon_emoji": ":grannylaughing:",
+            "username": "Old Lady",
+            "messages": [
+                "\n",
+                "Hahahahahahahahahahahahahahahahahahahaha",
+                "Haha, I suppose I'm in the right place..",
+            ],
+        },
+        {
+            "icon_emoji": ":unimpressedbirb:",
+            "username": "Bird",
+            "messages": [
+                "_*SQUAWK*_",
+                "_*CACAWHR*_",
+            ],
+            "buttons": [
+                {
+                    "text": "Dash",
+                    "action_id": "welcome_finish",
+                    "manually_defined": False,
+                }
+            ],
+        },
     ]
 ]
