@@ -6,7 +6,7 @@ WELCOME = [
             "message": "_*SQUAWK SQUAWK* (user_mention) has started the trail_",
             "messages": [
                 "_*SQUAWK SQUAWK* (user_mention) has started the trail_",
-                "_*CAWH, CAWH* (user_mention) approaches the trail_"
+                "_*CAWH, CAWH* (user_mention) approaches the trail_",
                 "_*SQWAAAWK* Hungrily wanting waffles, (user_mention) walks up to the trail, not knowing what to expect_",
             ],
         },
