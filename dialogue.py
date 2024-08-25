@@ -14,7 +14,8 @@ WELCOME = [
             "icon_emoji": ":distracteline:",
             "username": "Madeline",
             "messages": [
-                "Excuse me, ma'am\nThe sign out front is busted... is this the trail to the _:sparkles:waffle house:sparkles:_?"
+                "Excuse me, ma'am\nThe sign out front is busted... is this the trail to the _:sparkles:waffle house:sparkles:_?",
+                "Ma'am\nThe sign out front is busted... am I near the _:sparkles:waffle house:sparkles:_?"
             ],
         },
         {
@@ -22,6 +23,8 @@ WELCOME = [
             "username": "Old Lady",
             "messages": [
                 "_You're almost there, (pronouns). It's just across the bridge._",
+                "_You're nearly there, (pronouns). It's just over the bridge._",
+                "_The _:sparkles:waffle house:sparkles:_ is just over the bridge_ (pronouns)"
             ],
             "replacements": [
                 {"replace": "she", "with": "miss"},
