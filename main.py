@@ -17,10 +17,9 @@ def generate_handlers(app):
     button_ids = []
     for seq in WELCOME:
         for msg in seq:
-            if msg.get("buttons"):
-                for button in msg["buttons"]:
-                    if not button.get("manually_defined", False):
-                        button_ids.append(button["action_id"])
+            for button in msg.get("buttons", []):
+                if not button.get("manually_defined", False):
+                    button_ids.append(button["action_id"])
 
     for button_id in button_ids:
         @app.action(button_id)
