@@ -23,7 +23,6 @@ def generate_handlers(app):
                             @app.action(button["action_id"])
                             def handle_wait_button_click(ack, body, say):
                                 ack()
-                                print('ack')
                                 button_id = body["actions"][0]["action_id"]
 
                                 next_msg = None
@@ -34,11 +33,40 @@ def generate_handlers(app):
                                         if msg.get("wait_for", "") == button_id:
                                             next_msg = (msg, i)
 
+
+
                                 if not next_msg:
                                     print('not found message')
                                     say.info(f"No message found with the `wait_for` value {button_id}")
                                     return
-                                run_sequence(sequence, next_msg[1], body, say, waited_for=button_id)
+
+                                original_blocks = body["message"]["blocks"]
+
+                                updated_blocks = [block for block in original_blocks if block["type"] != "actions"]
+
+                                btn_text = next(
+                                    (
+                                        element["text"]["text"] for block in original_blocks if block["type"] == "actions" for element in block["elements"] if element["type"] == "button" and element["action_id"] == button_id
+                                    ), None
+                                )
+
+                                clicker = get_user_data(body, "user_id")
+                                updated_blocks.append({
+                                    "type": "section",
+                                    "text": {
+                                        "type": "mrkdwn",
+                                        "text": f"_<@{clicker}> pressed {btn_text}_"
+                                    }
+                                })
+
+
+                                app.client.chat_update(
+                                    channel=body["container"]["channel_id"],
+                                    ts=body["container"]["message_ts"],
+                                    blocks=updated_blocks,
+                                )
+
+                                run_sequence(sequence, next_msg[1], body, say, waited_for=button_id, thread_ts=body["container"]["message_ts"])
 
                         case "custom":
                             # A custom handler should be created - we are not auto generating
@@ -68,7 +96,7 @@ def get_user_data(body, type=None):
 
 def run_dialogue(msg, body, say, thread_ts=None):
     new_msg = random.choice(msg["messages"])
-    print(body)
+
     if "(pronouns)" in new_msg.lower():
         user = app.client.users_info(user=get_user_data(body, type="user_id"))
         pronouns = user["user"]["profile"]["pronouns"]
@@ -119,19 +147,16 @@ def run_dialogue(msg, body, say, thread_ts=None):
     return sent_msg
 
 
-def run_sequence(seq, i, body, say, waited_for=""):
-    initial_msg = None
-
+def run_sequence(seq, i, body, say, waited_for="", thread_ts=None):
     for msg in seq[i:]:
-        print(seq[i:], waited_for)
+
         if msg.get("wait_for", "") != waited_for:
-            print('breaking because waiting')
             break
 
-        sent_msg = run_dialogue(msg, body, say, initial_msg)
+        sent_msg = run_dialogue(msg, body, say, thread_ts)
 
-        if initial_msg is None:
-            initial_msg = sent_msg["ts"]
+        if thread_ts is None:
+            thread_ts = sent_msg["ts"]
         time.sleep(msg.get("delay", 1.8))
 
 

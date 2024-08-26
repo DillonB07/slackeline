@@ -111,15 +111,15 @@ WELCOME = [
                 {
                     "text": "Dash",
                     "type": "wait",
-                    "action_id": "end-of-welcome"
+                    "action_id": "end-of-welcome",
                 }
             ],
         },
         {
-            "icon_emoji": ":flyingbirb:",
-            "username": "Bird",
+            "icon_emoji": ":giggline:",
+            "username": "Madeline",
             "messages": [
-                "Meow :3"
+                "That's gonna make things a lot easier! Thanks, birdie."
             ],
             "wait_for": "end-of-welcome"
         }
