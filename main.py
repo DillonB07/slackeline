@@ -14,82 +14,131 @@ app = App(
 )
 
 def generate_handlers(app):
-    button_ids = []
     for seq in WELCOME:
         for msg in seq:
             for button in msg.get("buttons", []):
-                if not button.get("manually_defined", False):
-                    button_ids.append(button["action_id"])
+                if button.get("type", "wait") != "custom":
+                    match button.get("type"):
+                        case "wait":
+                            @app.action(button["action_id"])
+                            def handle_wait_button_click(ack, body, say):
+                                ack()
+                                print('ack')
+                                button_id = body["actions"][0]["action_id"]
 
-    for button_id in button_ids:
-        @app.action(button_id)
-        def handle_button_click(ack, body, say):
-            ack()
-            say("button go clicky :sleepybirb:", thread_ts=body["container"]["message_ts"])
+                                next_msg = None
+                                sequence = []
+                                for seq in WELCOME:
+                                    sequence = seq
+                                    for i, msg in enumerate(seq):
+                                        if msg.get("wait_for", "") == button_id:
+                                            next_msg = (msg, i)
 
+                                if not next_msg:
+                                    print('not found message')
+                                    say.info(f"No message found with the `wait_for` value {button_id}")
+                                    return
+                                run_sequence(sequence, next_msg[1], body, say, waited_for=button_id)
+
+                        case "custom":
+                            # A custom handler should be created - we are not auto generating
+                            pass
+                        case _:
+                            @app.action(button["action_id"])
+                            def handle_button_click(ack, body, say):
+                                ack()
+                                button_id = body["actions"][0]["action_id"]
+                                say(f"Ruh roh! Hey <@U054VC2KM9P>, <@{body['user']['id']}> clicked a button with an unknown type: {button['type']}", thread_ts=body["container"]["message_ts"])
+
+                            raise ValueError(f"Unknown button type: {button['type']}")
+
+def get_user_data(body, type=None):
+    if body.get('type') == 'block_actions':
+        match type:
+            case "user_id":
+                return body['user']['id']
+            case _:
+                return body['user']
+    else:
+        match type:
+            case "user_id":
+                return body['event']['user']
+            case _:
+                return body['event']
+
+def run_dialogue(msg, body, say, thread_ts=None):
+    new_msg = random.choice(msg["messages"])
+    print(body)
+    if "(pronouns)" in new_msg.lower():
+        user = app.client.users_info(user=get_user_data(body, type="user_id"))
+        pronouns = user["user"]["profile"]["pronouns"]
+        replaced = False
+        for replacement in msg.get("replacements", []):
+            if replacement["replace"] in pronouns:
+                new_msg = new_msg.replace("(pronouns)", replacement["with"])
+                replaced = True
+                break
+
+        if not replaced:
+            default = next(
+                (
+                    replacement["with"]
+                    for replacement in msg.get("replacements", [])
+                    if replacement.get("default")
+                ),
+                None,
+            )
+            new_msg = new_msg.replace("(pronouns)", default)
+
+    if "user_mention" in new_msg.lower():
+        new_msg = new_msg.replace("(user_mention)", f"<@{get_user_data(body, type='user_id')}>")
+
+    if msg.get("buttons"):
+        blocks = [
+            {"type": "section", "text": {"type": "mrkdwn", "text": new_msg}},
+            {"type": "actions", "elements": []},
+        ]
+        for button in msg["buttons"]:
+            blocks[1]["elements"].append(
+                {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": button["text"]},
+                    "action_id": button["action_id"],
+                }
+            )
+
+        sent_msg = say(blocks=blocks, icon_emoji=msg["icon_emoji"], username=msg["username"], thread_ts=thread_ts)
+    else:
+        sent_msg = say(
+            text=new_msg,
+            icon_emoji=msg["icon_emoji"],
+            username=msg["username"],
+            thread_ts=thread_ts,
+        )
+
+    return sent_msg
+
+
+def run_sequence(seq, i, body, say, waited_for=""):
+    initial_msg = None
+
+    for msg in seq[i:]:
+        print(seq[i:], waited_for)
+        if msg.get("wait_for", "") != waited_for:
+            print('breaking because waiting')
+            break
+
+        sent_msg = run_dialogue(msg, body, say, initial_msg)
+
+        if initial_msg is None:
+            initial_msg = sent_msg["ts"]
+        time.sleep(msg.get("delay", 1.8))
 
 
 @app.event("member_joined_channel")
 def handle_member_joined_channel(body, say):
-    user = app.client.users_info(user=body["event"]["user"])
-    pronouns = user["user"]["profile"]["pronouns"]
-
-    welcome_seq = WELCOME[0]
-    initial_msg = None
-    for msg in welcome_seq:
-        new_msg = random.choice(msg["messages"])
-
-        if "(pronouns)" in new_msg.lower():
-            replaced = False
-            for replacement in msg.get("replacements", []):
-                if replacement["replace"] in pronouns:
-                    new_msg = new_msg.replace("(pronouns)", replacement["with"])
-                    replaced = True
-                    break
-
-            if not replaced:
-                default = next(
-                    (
-                        replacement["with"]
-                        for replacement in msg.get("replacements", [])
-                        if replacement.get("default")
-                    ),
-                    None,
-                )
-                new_msg = new_msg.replace("(pronouns)", default)
-
-        if "user_mention" in new_msg.lower():
-            new_msg = new_msg.replace("(user_mention)", f"<@{body['event']['user']}>")
-
-        if msg.get("buttons"):
-            blocks = [
-                {"type": "section", "text": {"type": "mrkdwn", "text": new_msg}},
-                {"type": "actions", "elements": []},
-            ]
-            for button in msg["buttons"]:
-                blocks[1]["elements"].append(
-                    {
-                        "type": "button",
-                        "text": {"type": "plain_text", "text": button["text"]},
-                        "action_id": button["action_id"],
-                    }
-                )
-
-            sent_msg = say(blocks=blocks, icon_emoji=msg["icon_emoji"], username=msg["username"], thread_ts=initial_msg)
-        else:
-            sent_msg = say(
-                text=new_msg,
-                icon_emoji=msg["icon_emoji"],
-                username=msg["username"],
-                thread_ts=initial_msg,
-            )
-
-        if initial_msg is None:
-            initial_msg = sent_msg["ts"]
-
-        time.sleep(msg.get("delay", 1.8))
-
-
+    welcome_seq = random.choice(WELCOME)
+    run_sequence(welcome_seq, 0, body, say)
 
 
 if __name__ == "__main__":

@@ -110,10 +110,18 @@ WELCOME = [
             "buttons": [
                 {
                     "text": "Dash",
-                    "action_id": "welcome_finish",
-                    "manually_defined": False,
+                    "type": "wait",
+                    "action_id": "end-of-welcome"
                 }
             ],
         },
+        {
+            "icon_emoji": ":flyingbirb:",
+            "username": "Bird",
+            "messages": [
+                "Meow :3"
+            ],
+            "wait_for": "end-of-welcome"
+        }
     ]
 ]
