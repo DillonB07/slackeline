@@ -1,10 +1,13 @@
 import os
 import time
 import random
+import pytz
 
 from slack_bolt import App
 from dotenv import load_dotenv
-from dialogue import WELCOME
+from dialogue import SCHEDULED, WELCOME
+from croniter import croniter
+from datetime import datetime, timezone
 
 load_dotenv()
 
@@ -12,6 +15,30 @@ app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
 )
+
+CHANNEL_ID = "C06R5NKVCG5" if os.environ.get("PORT", 3000) != 3000 else "C07AVPX7NM9"
+
+
+def run_scheduler():
+    tz = pytz.timezone("Europe/London")
+    base_time = tz.localize(datetime(2021, 1, 1, 0, 0, 0))
+    times = []
+    for schedule in SCHEDULED:
+        cron = croniter(schedule["cron"], base_time)
+        next_time = cron.get_next(datetime)
+        times.append(next_time)
+
+    while True:
+        now = tz.localize(datetime.now())
+        for i, t in enumerate(times):
+            if now >= t:
+                seqs = SCHEDULED[i]["sequences"]
+                seq = random.choice(seqs)
+                run_sequence(seq)
+                cron = croniter(SCHEDULED[i]["cron"], now)
+                times[i] = cron.get_next(datetime)
+        time.sleep(60)
+
 
 def generate_handlers(app):
     for seq in WELCOME:
@@ -66,7 +93,7 @@ def generate_handlers(app):
                                     blocks=updated_blocks,
                                 )
 
-                                run_sequence(sequence, next_msg[1], body, say, waited_for=button_id, thread_ts=body["container"]["message_ts"])
+                                run_sequence(sequence, body, say, waited_for=button_id, thread_ts=body["container"]["message_ts"], i=next_msg[1])
 
                         case "custom":
                             # A custom handler should be created - we are not auto generating
@@ -96,6 +123,7 @@ def get_user_data(body, type=None):
 
 def run_dialogue(msg, body, say, thread_ts=None):
     new_msg = random.choice(msg["messages"])
+
 
     if "(pronouns)" in new_msg.lower():
         user = app.client.users_info(user=get_user_data(body, type="user_id"))
@@ -135,9 +163,10 @@ def run_dialogue(msg, body, say, thread_ts=None):
                 }
             )
 
-        sent_msg = say(blocks=blocks, icon_emoji=msg["icon_emoji"], username=msg["username"], thread_ts=thread_ts)
+        sent_msg = app.client.chat_postMessage(channel=CHANNEL_ID, blocks=blocks, icon_emoji=msg["icon_emoji"], username=msg["username"], thread_ts=thread_ts)
     else:
-        sent_msg = say(
+        sent_msg = app.client.chat_postMessage(
+            channel=CHANNEL_ID,
             text=new_msg,
             icon_emoji=msg["icon_emoji"],
             username=msg["username"],
@@ -146,8 +175,7 @@ def run_dialogue(msg, body, say, thread_ts=None):
 
     return sent_msg
 
-
-def run_sequence(seq, i, body, say, waited_for="", thread_ts=None):
+def run_sequence(seq, body=None, say=None, waited_for="", thread_ts=None, i=0):
     for msg in seq[i:]:
 
         if msg.get("wait_for", "") != waited_for:
@@ -163,9 +191,14 @@ def run_sequence(seq, i, body, say, waited_for="", thread_ts=None):
 @app.event("member_joined_channel")
 def handle_member_joined_channel(body, say):
     welcome_seq = random.choice(WELCOME)
-    run_sequence(welcome_seq, 0, body, say)
+    run_sequence(welcome_seq, body, say)
 
 
 if __name__ == "__main__":
     generate_handlers(app)
+
+    import threading
+    scheduler_thread = threading.Thread(target=run_scheduler)
+    scheduler_thread.start()
+
     app.start(port=int(os.environ.get("PORT", 3000)))

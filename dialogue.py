@@ -125,3 +125,26 @@ WELCOME = [
         }
     ]
 ]
+
+SCHEDULED = [
+    {
+        "cron": "0 9 * * *",
+        "sequences": [
+            [
+                {
+                    "icon_emoji": ":flyingbirb:",
+                    "username": "Bird",
+                    "messages": [
+                        "_*SQUAWK SQUAWK* Good morning everyone!_",
+                    ]
+                }, {
+                    "icon_emoji": ":shockedeline:",
+                    "username": "Madeline",
+                    "messages": [
+                        "_yawhnnn_ wahtt time is it??!\nwait... how is it morning already :sleepybirb:"
+                    ]
+                }
+            ]
+        ]
+    }
+]
