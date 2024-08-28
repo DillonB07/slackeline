@@ -2,18 +2,59 @@
 
 Slackeline is a bot for my personal channel in the Hack Club Slack, [#dillan-waffles](https://hackclub.slack.com/archives/C06R5NKVCG5). The name comes from the Madeline who is the protaganist in Celeste, my favourite game - an indie puzzle platformer.
 
-Currently, Slackeline only welcomes people, but I plan to add more functionality to increase channel interaction! Stories, questions and mysteries are some things planned.
+Currently, Slackeline only welcomes people and can run scheduled messages but I plan to add more functionality to increase channel interaction! Stories, questions and mysteries are some things planned.
 
-## Welcoming
+## Features
 
-Slackeline detects when a new user joins a channel she is in and then starts a dialogue sequence using custom avatars and names. The dialogue is reminiscent of the prologue in Celeste.
+### Sequences
+
+This is the barebones of Slackeline. Sequences are a series of messages that are sent in order. They can contain (rudimentary) buttons, custom avatars, custom usernames and custom text.
+
+To update the dialogue, or add new dialogue, you only need to modify the dictionaries in `dialogue.py`.
+
+Dialogue trees _might_ come in the future!
+
+### Welcoming
+
+Slackeline detects when a new user joins a channel she is in and then starts a dialogue sequence reminiscent of the prologue in Celeste.
 
 ![Part of the dialogue](https://cloud-6cqevouz9-hack-club-bot.vercel.app/0image.png)
 > _Part of the dialogue sequence_
 
-I built a custom dialogue system for this so I can easily expand it using JSON (well, dictionaries but close enough).
 
-I would like to expand on this system with buttons and trees to make dialogue more interesting.
+### Buttons
+
+Currently there are two types of button - `wait` and `custom`.
+A `wait` button will wait for it to be pressed before proceeding to the message with the value of `waitFor` set to the action id of the button.
+A `custom` button needs to have a handler created manually and can do anything you program it to.
+
+Handlers for all buttons except `custom` are automatically created.
+
+### Scheduling
+
+Sequences can be scheduled to run using cron syntax. This is useful for things like daily messages or reminders.
+
+To schedule a sequence, add a dictionary to the `SCHEDULED` list in `dialogue.py`.
+The dictionary should be structured as follows:
+
+```py
+{
+    "cron": "0 9 * * *", # cron syntax for how often you want it to run
+    "sequences": [ # A sequence will be randomly selected, only one is necessary
+        [
+            {
+                "icon_emoji": ":madeline:",
+                "username": "Madeline",
+                "messages": [
+                    "Good morning Theo!\nGood morning Granny!\nGood morning Baddy"
+                ]
+            }, {
+                "icon_emoji": ":theo_:"
+            }
+        ]
+    ]
+}
+```
 
 ## Setup
 
