@@ -9,13 +9,6 @@ WELCOME = [
                 "_*CAWH, CAWH* (user_mention) approaches the trail_",
                 "_*SQWAAAWK* Hungrily wanting waffles, (user_mention) walks up to the trail, not knowing what to expect_",
             ],
-            "buttons": [
-                 {
-                     "text": "Proceed...",
-                     "type": "wait",
-                     "action_id": "start-of-welcome"
-                 }
-             ]
         },
         {
             "icon_emoji": ":distracteline:",
@@ -24,7 +17,6 @@ WELCOME = [
                 "Excuse me, ma'am\nThe sign out front is busted... is this the trail to the _:sparkles:waffle house:sparkles:_?",
                 "Ma'am, the sign out front is busted... am I near the _:sparkles:waffle house:sparkles:_?",
             ],
-            "wait_for": "start-of-welcome"
         },
         {
             "icon_emoji": ":grannycreep:",
