@@ -1,4 +1,5 @@
 import os
+from re import X
 import time
 import random
 import pytz
@@ -21,7 +22,7 @@ CHANNEL_ID = "C06R5NKVCG5" if os.environ.get("PORT", 3000) != 3000 else "C07AVPX
 
 def run_scheduler():
     tz = pytz.timezone("Europe/London")
-    base_time = tz.localize(datetime(2021, 1, 1, 0, 0, 0))
+    base_time = tz.localize(datetime.now())
     times = []
     for schedule in SCHEDULED:
         cron = croniter(schedule["cron"], base_time)
