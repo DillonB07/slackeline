@@ -118,11 +118,9 @@ WELCOME = [
         {
             "icon_emoji": ":giggline:",
             "username": "Madeline",
-            "messages": [
-                "That's gonna make things a lot easier! Thanks, birdie."
-            ],
-            "wait_for": "end-of-welcome"
-        }
+            "messages": ["That's gonna make things a lot easier! Thanks, birdie."],
+            "wait_for": "end-of-welcome",
+        },
     ]
 ]
 
@@ -136,15 +134,39 @@ SCHEDULED = [
                     "username": "Bird",
                     "messages": [
                         "_*SQUAWK SQUAWK* Good morning everyone!_",
-                    ]
-                }, {
+                    ],
+                },
+                {
                     "icon_emoji": ":shockedeline:",
                     "username": "Madeline",
                     "messages": [
                         "_yawhnnn_ wahtt time is it??!\nwait... how is it morning already :sleepybirb:"
+                    ],
+                },
+            ]
+        ],
+    },
+    {
+        "cron": "30 21 * * *",
+        "sequences": [
+            [
+                {
+                    "icon_emoji": ":distracteline:",
+                    "username": "Madeline",
+                    "messages": [
+                        "Hey Dillan.... what have you <been up to|https://hackclub.slack.com/archives/C06R5NKVCG5/p1723232934471779> today?"
+                    ],
+                }
+            ],
+            [
+                {
+                    "icon_emoji": ":unimpressedbirb:",
+                    "username": "Bird",
+                    "messages": [
+                        "_*SQUAWK SQUAWK* it's time for your <daily breakdown|https://hackclub.slack.com/archives/C06R5NKVCG5/p1723232934471779>, Dillan_",
                     ]
                 }
             ]
-        ]
-    }
+        ],
+    },
 ]
