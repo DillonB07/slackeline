@@ -227,6 +227,31 @@ def handle_member_joined_channel(body, say):
     welcome_seq = random.choice(WELCOME)
     run_sequence(welcome_seq, body, say)
 
+@app.event("message")
+def handle_message(body, say):
+    # check if message is DM and that dillon is running it
+    if body["event"].get("channel_type") == "im" and body["event"].get("user") == "U054VC2KM9P":
+        message = body["event"]["text"]
+        # message should be in the following format: "message <message> as <username> with <icon> in <channel/user>"
+        if message.startswith("message"):
+            message = message.split('message “')[1]
+            message = message.split('” as “')
+            message_text = message[0]
+            message = message[1].split('” with “')
+            username = message[0]
+            message = message[1].split('” in ')
+            icon = message[0]
+            channel_unparsed = message[1]
+            channel = channel_unparsed.split('|')[0]
+            channel = channel[2:]
+            channel = channel.strip(">")
+
+            app.client.chat_postMessage(
+                channel=channel,
+                text=message_text,
+                icon_emoji=icon,
+                username=username,
+            )
 
 if __name__ == "__main__":
     generate_handlers(app)
