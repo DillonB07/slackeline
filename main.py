@@ -224,6 +224,9 @@ def run_sequence(seq, body=None, say=None, waited_for="", thread_ts=None, i=0):
 
 @app.event("member_joined_channel")
 def handle_member_joined_channel(body, say):
+    channel_id = body["event"]["channel"]
+    if channel_id != CHANNEL_ID:
+        return
     welcome_seq = random.choice(WELCOME)
     run_sequence(welcome_seq, body, say)
 
