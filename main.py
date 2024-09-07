@@ -10,6 +10,9 @@ from dialogue import SCHEDULED, WELCOME
 from croniter import croniter
 from datetime import datetime, timezone
 
+from events.phone import send_phone_message
+from views.home import generate_home_view
+
 load_dotenv()
 
 app = App(
@@ -255,6 +258,15 @@ def handle_message(body, say):
                 icon_emoji=icon,
                 username=username,
             )
+
+@app.event("app_home_opened")
+def update_home_tab(client, event, logger):
+    generate_home_view(client, event, logger)
+
+@app.action("submit_phone_call")
+def handle_phone_submit(ack, body, client):
+    ack()
+    send_phone_message(body, client)
 
 if __name__ == "__main__":
     generate_handlers(app)
