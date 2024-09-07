@@ -14,7 +14,7 @@ def generate_home_view(client, event, logger):
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": f":waveline: Hiii <@{event["user"]}>! What would you like me to do?"
+				"text": f":waveline: Hiii <@{event['user']}>! What would you like me to do?"
 			}
 		},
 		{
