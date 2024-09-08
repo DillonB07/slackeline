@@ -7,7 +7,9 @@ def send_phone_message(body, client, airtable):
     user_id = body["user"]["id"]
     user_data = airtable.get_user(user_id)
 
-    if not user_data or (not user_data['fields'].get('Allowed to Phone') and not user_data['fields'].get('Admin')):
+    if not user_data:
+       airtable.update_or_add_user(user_id, body["user"]["name"])
+    if (not user_data['fields'].get('Allowed to Phone') and not user_data['fields'].get('Admin')):
         client.chat_postMessage(channel=user_id, text="You are not allowed to use this feature.")
         return
 
@@ -30,4 +32,4 @@ def send_phone_message(body, client, airtable):
 
     client.chat_postMessage(channel=location, text=message, icon_emoji=emoji, username=username)
     if location in BLACKLISTED_CHANNELS:
-        client.chat_postMessage(channel=body["user"]["id"], text="Nice try")
+        client.chat_postMessage(channel=user_id, text="Nice try")
