@@ -205,6 +205,7 @@ def run_dialogue(msg, body, say, thread_ts=None):
             icon_emoji=msg["icon_emoji"],
             username=msg["username"],
             thread_ts=thread_ts,
+            parse="full",
         )
     else:
         sent_msg = app.client.chat_postMessage(
@@ -213,6 +214,7 @@ def run_dialogue(msg, body, say, thread_ts=None):
             icon_emoji=msg["icon_emoji"],
             username=msg["username"],
             thread_ts=thread_ts,
+            parse="full",
         )
 
     return sent_msg
