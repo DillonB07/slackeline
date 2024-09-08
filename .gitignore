@@ -4,3 +4,4 @@ data.json
 .env
 script.py
 script.ts
+.DS_Store
