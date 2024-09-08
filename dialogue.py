@@ -164,9 +164,9 @@ SCHEDULED = [
                     "username": "Bird",
                     "messages": [
                         "_*SQUAWK SQUAWK* it's time for your <daily breakdown|https://hackclub.slack.com/archives/C06R5NKVCG5/p1723232934471779>, Dillan_",
-                    ]
+                    ],
                 }
-            ]
+            ],
         ],
     },
 ]
