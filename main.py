@@ -21,6 +21,7 @@ app = App(
 )
 
 CHANNEL_ID = "C06R5NKVCG5" if os.environ.get("PORT", 3000) != 3000 else "C07AVPX7NM9"
+WHITELISTED_USERS = ["U054VC2KM9P"]
 
 
 def run_scheduler():
@@ -51,7 +52,6 @@ def generate_handlers(app):
                 if button.get("type", "wait") != "custom":
                     match button.get("type"):
                         case "wait":
-
                             @app.action(button["action_id"])
                             def handle_wait_button_click(ack, body, say):
                                 ack()
@@ -240,12 +240,14 @@ def handle_message(body, say):
         message = body["event"]["text"]
         # message should be in the following format: "message <message> as <username> with <icon> in <channel/user>"
         if message.startswith("message"):
-            message = message.split('message “')[1]
-            message = message.split('” as “')
+            message.replace('”', '"')
+            message.replace('“', '"')
+            message = message.split('message "')[1]
+            message = message.split('" as "')
             message_text = message[0]
-            message = message[1].split('” with “')
+            message = message[1].split('" with "')
             username = message[0]
-            message = message[1].split('” in ')
+            message = message[1].split('" in ')
             icon = message[0]
             channel_unparsed = message[1]
             channel = channel_unparsed.split('|')[0]

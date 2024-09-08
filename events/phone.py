@@ -1,5 +1,7 @@
 import json
 
+BLACKLISTED_CHANNELS = []
+
 def send_phone_message(body, client):
     location = body["view"]["state"]["values"]["conversations_select"]["conversations_select-action"]["selected_conversation"]
     message = body["view"]["state"]["values"]["message_input"]["message_input"]["value"]
@@ -14,4 +16,7 @@ def send_phone_message(body, client):
     #         print("Not in channel, joining")
     #         client.conversations_invite(channel=location, users="U07JRF405L1")
 
-    client.chat_postMessage(channel=location, text=message, icon_emoji=emoji, username=username)
+    # client.chat_postMessage(channel=location, text=message, icon_emoji=emoji, username=username)
+    if location in BLACKLISTED_CHANNELS:
+        client.chat_postMessage(channel=body['user']['id'], text='Nice try')
+    client.chat_postMessage(channel=body['user']['id'], text='No. That\'s enough fun')
