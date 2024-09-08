@@ -6,12 +6,12 @@ import pytz
 
 from slack_bolt import App
 from dotenv import load_dotenv
-from airtable import AirtableManager
 from dialogue import SCHEDULED, WELCOME
 from croniter import croniter
 from datetime import datetime, timezone
 
 from events.phone import send_phone_message
+from utils.airtable import AirtableManager
 from views.home import generate_home_view
 
 load_dotenv()
@@ -205,7 +205,6 @@ def run_dialogue(msg, body, say, thread_ts=None):
             icon_emoji=msg["icon_emoji"],
             username=msg["username"],
             thread_ts=thread_ts,
-            parse="full",
         )
     else:
         sent_msg = app.client.chat_postMessage(
@@ -214,7 +213,6 @@ def run_dialogue(msg, body, say, thread_ts=None):
             icon_emoji=msg["icon_emoji"],
             username=msg["username"],
             thread_ts=thread_ts,
-            parse="full",
         )
 
     return sent_msg
