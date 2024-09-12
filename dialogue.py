@@ -155,7 +155,6 @@ SCHEDULED = [
                     "username": "Madeline",
                     "messages": [
                         "Hey Dillan.... what have you <https://hackclub.slack.com/archives/C06R5NKVCG5/p1723232934471779|been up to> today?"
-                        "Hey Dillan.... what have you been up to today?"
                     ],
                 }
             ],
@@ -165,7 +164,6 @@ SCHEDULED = [
                     "username": "Bird",
                     "messages": [
                         "_*SQUAWK SQUAWK* it's time for your <https://hackclub.slack.com/archives/C06R5NKVCG5/p1723232934471779|daily breakdown>, Dillan_",
-                        "_*SQUAWK SQUAWK* it's time for your daily breakdown, Dillan_",
                     ],
                 }
             ],
