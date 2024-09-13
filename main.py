@@ -161,9 +161,8 @@ def run_dialogue(msg, body, say, thread_ts=None):
 
     if "(pronouns)" in new_msg.lower():
         user = app.client.users_info(user=get_user_data(body, type="user_id"))
-        pronouns = user["user"]["profile"]["pronouns"]
-        if not pronouns:
-            pronouns = "they/them"
+        pronouns = user["user"]["profile"].get("pronouns", "they/them")
+
         replaced = False
         for replacement in msg.get("replacements", []):
             if replacement["replace"] in pronouns:
