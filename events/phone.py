@@ -19,9 +19,6 @@ def send_phone_message(body, client, airtable):
     message = body["view"]["state"]["values"]["message_input"]["message_input"]["value"]
     emoji = body["view"]["state"]["values"]["emoji"]["emoji"]["value"]
     username = body["view"]["state"]["values"]["username"]["username"]["value"]
-    print(
-        f"Sending {message} as {username} with {emoji} to {location} - {body['user']}"
-    )
 
     # check if the bot is in the channel
     # if not, invite the bot to the channel

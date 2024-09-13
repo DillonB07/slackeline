@@ -4,30 +4,18 @@ import time
 import random
 import pytz
 
-from slack_bolt import App
 from dotenv import load_dotenv
 from dialogue import SCHEDULED, WELCOME
 from croniter import croniter
 from datetime import datetime, timezone
 
-from events.phone import send_phone_message
+
 from utils.airtable import AirtableManager
-from views.home import generate_home_view
+from utils.slack import app
+from utils.utils import get_user_data
+from utils.sequences import run_sequence
 
 load_dotenv()
-
-app = App(
-    token=os.environ.get("SLACK_BOT_TOKEN"),
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
-)
-airtable = AirtableManager(
-    api_key=os.environ.get("AIRTABLE_API_KEY"),
-    base_id=os.environ.get("AIRTABLE_BASE_ID"),
-)
-
-CHANNEL_ID = "C06R5NKVCG5" if os.environ.get("PORT", 3000) != 3000 else "C07AVPX7NM9"
-WHITELISTED_USERS = ["U054VC2KM9P"]
-
 
 def run_scheduler():
     tz = pytz.timezone("Europe/London")
@@ -44,7 +32,7 @@ def run_scheduler():
             if now >= t:
                 seqs = SCHEDULED[i]["sequences"]
                 seq = random.choice(seqs)
-                run_sequence(seq)
+                run_sequence(seq, app)
                 cron = croniter(SCHEDULED[i]["cron"], now)
                 times[i] = cron.get_next(datetime)
         time.sleep(60)
@@ -117,6 +105,7 @@ def generate_handlers(app):
 
                                 run_sequence(
                                     sequence,
+                                    app,
                                     body,
                                     say,
                                     waited_for=button_id,
@@ -139,149 +128,6 @@ def generate_handlers(app):
                                 )
 
                             raise ValueError(f"Unknown button type: {button['type']}")
-
-
-def get_user_data(body, type=None):
-    if body.get("type") == "block_actions":
-        match type:
-            case "user_id":
-                return body["user"]["id"]
-            case _:
-                return body["user"]
-    else:
-        match type:
-            case "user_id":
-                return body["event"]["user"]
-            case _:
-                return body["event"]
-
-
-def run_dialogue(msg, body, say, thread_ts=None):
-    new_msg = random.choice(msg["messages"])
-
-    if "(pronouns)" in new_msg.lower():
-        user = app.client.users_info(user=get_user_data(body, type="user_id"))
-        pronouns = user["user"]["profile"].get("pronouns", "they/them")
-
-        replaced = False
-        for replacement in msg.get("replacements", []):
-            if replacement["replace"] in pronouns:
-                new_msg = new_msg.replace("(pronouns)", replacement["with"])
-                replaced = True
-                break
-
-        if not replaced:
-            default = next(
-                (
-                    replacement["with"]
-                    for replacement in msg.get("replacements", [])
-                    if replacement.get("default")
-                ),
-                None,
-            )
-            new_msg = new_msg.replace("(pronouns)", default)
-
-    if "user_mention" in new_msg.lower():
-        new_msg = new_msg.replace(
-            "(user_mention)", f"<@{get_user_data(body, type='user_id')}>"
-        )
-
-    if msg.get("buttons"):
-        blocks = [
-            {"type": "section", "text": {"type": "mrkdwn", "text": new_msg}},
-            {"type": "actions", "elements": []},
-        ]
-        for button in msg["buttons"]:
-            blocks[1]["elements"].append(
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": button["text"]},
-                    "action_id": button["action_id"],
-                }
-            )
-
-        sent_msg = app.client.chat_postMessage(
-            channel=CHANNEL_ID,
-            blocks=blocks,
-            icon_emoji=msg["icon_emoji"],
-            username=msg["username"],
-            thread_ts=thread_ts,
-        )
-    else:
-        sent_msg = app.client.chat_postMessage(
-            channel=CHANNEL_ID,
-            text=new_msg,
-            icon_emoji=msg["icon_emoji"],
-            username=msg["username"],
-            thread_ts=thread_ts,
-        )
-
-    return sent_msg
-
-
-def run_sequence(seq, body=None, say=None, waited_for="", thread_ts=None, i=0):
-    for msg in seq[i:]:
-
-        if msg.get("wait_for", "") != waited_for:
-            break
-
-        sent_msg = run_dialogue(msg, body, say, thread_ts)
-
-        if thread_ts is None:
-            thread_ts = sent_msg["ts"]
-        time.sleep(msg.get("delay", 1.8))
-
-
-@app.event("member_joined_channel")
-def handle_member_joined_channel(body, say):
-    channel_id = body["event"]["channel"]
-    if channel_id != CHANNEL_ID:
-        return
-    welcome_seq = random.choice(WELCOME)
-    run_sequence(welcome_seq, body, say)
-
-
-@app.event("message")
-def handle_message(body, say):
-    # check if message is DM and that dillon is running it
-    if (
-        body["event"].get("channel_type") == "im"
-        and body["event"].get("user") == "U054VC2KM9P"
-    ):
-        message = body["event"]["text"]
-        # message should be in the following format: "message <message> as <username> with <icon> in <channel/user>"
-        if message.startswith("message"):
-            message.replace("”", '"')
-            message.replace("“", '"')
-            message = message.split('message "')[1]
-            message = message.split('" as "')
-            message_text = message[0]
-            message = message[1].split('" with "')
-            username = message[0]
-            message = message[1].split('" in ')
-            icon = message[0]
-            channel_unparsed = message[1]
-            channel = channel_unparsed.split("|")[0]
-            channel = channel[2:]
-            channel = channel.strip(">")
-
-            app.client.chat_postMessage(
-                channel=channel,
-                text=message_text,
-                icon_emoji=icon,
-                username=username,
-            )
-
-
-@app.event("app_home_opened")
-def update_home_tab(client, event, logger):
-    generate_home_view(client, event, logger, airtable)
-
-
-@app.action("submit_phone_call")
-def handle_phone_submit(ack, body, client):
-    ack()
-    send_phone_message(body, client, airtable)
 
 
 if __name__ == "__main__":

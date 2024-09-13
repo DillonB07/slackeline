@@ -1,5 +1,8 @@
-from pyairtable import Table, Api
+from dotenv import load_dotenv
+from pyairtable import Api
+import os
 
+load_dotenv()
 
 class AirtableManager:
     def __init__(self, api_key, base_id):
@@ -10,6 +13,7 @@ class AirtableManager:
         print('Connected to Airtable')
 
     def get_user(self, user_id):
+        print(f"Getting user {user_id}")
         user = self.user_table.first(formula=f"{{User ID}} = '{user_id}'")
         return user
 
@@ -47,3 +51,9 @@ class AirtableManager:
         except Exception as e:
             print(f"Error adding log to Airtable: {e}")
             return False
+
+
+airtable = AirtableManager(
+    api_key=os.environ.get("AIRTABLE_API_KEY"),
+    base_id=os.environ.get("AIRTABLE_BASE_ID"),
+)
