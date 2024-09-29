@@ -147,6 +147,29 @@ SCHEDULED = [
         ],
     },
     {
+        "cron": "30 7 * * 1",
+        "sequences": [
+            [
+                {
+                    "icon_emoji": ":celeste-mom-normal00:",
+                    "username": "Mum",
+                    "messages": [
+                        "Dillan, be sure to ask your friends a question to _make some new pals_!",
+                    ],
+                }
+            ],
+            [
+                {
+                    "icon_emoji": ":celeste-mom-normal01:",
+                    "username": "Mum",
+                    "messages": [
+                        "Dillan, do you know what time it is? It's *question-asking time*!",
+                    ],
+                }
+            ],
+        ],
+    },
+    {
         "cron": "30 21 * * *",
         "sequences": [
             [
