@@ -3,7 +3,6 @@ WELCOME = [
         {
             "icon_emoji": ":flyingbirb:",
             "username": "Bird",
-            "message": "_*SQUAWK SQUAWK* (user_mention) has started the trail_",
             "messages": [
                 "_*SQUAWK SQUAWK* (user_mention) has started the trail_",
                 "_*CAWH, CAWH* (user_mention) approaches the trail_",

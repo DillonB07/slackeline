@@ -9,6 +9,7 @@ from .sequences import run_sequence
 from .airtable import airtable
 import os
 import random
+import json
 
 load_dotenv()
 
@@ -111,4 +112,43 @@ def join_ambers_channel(ack, body, client):
     client.conversations_invite(
         channel=CHANNEL_ID,
         users=user_id
+    )
+
+@app.command("/find-mailee")
+def find_mailee(ack, body, client, respond):
+    ack()
+    user_id = body["user_id"]
+
+    if user_id != "U054VC2KM9P":
+        client.chat_postMessage(
+            channel=user_id,
+            text="Sorry, this command is only available for amber!"
+        )
+        return
+    
+    records = client.slackLists_items_list(list_id=os.environ.get("MAIL_LIST_ID"), limit=100)
+    mailee = random.choice(records["items"])
+    id = None
+    address = None
+    for field in mailee["fields"]:
+        if field["key"] == "Person":
+            id = json.loads(field["user"])[0]
+        if field["key"] == "Address":
+            address = field["rich_text"]
+    
+    if not id or not address:
+        respond(
+            text="Could not find a valid mailee!"
+        )
+        return
+    
+    respond(
+        text=f"you need to send mail too.... <@{id}>!! :tada:!"
+    )
+    
+    client.chat_postMessage(
+        channel=user_id,
+        blocks=[
+            address
+        ]
     )
